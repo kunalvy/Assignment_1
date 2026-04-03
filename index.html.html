@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Optima Learn — DILR Engine + VARC AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --green:#059669;--green-l:#d1fae5;--green-m:#6ee7b7;--green-d:#047857;
+  --red:#ef4444;--red-l:#fee2e2;--amber:#f59e0b;--amber-l:#fef3c7;
+  --blue:#3b82f6;--blue-l:#dbeafe;--purple:#8b5cf6;--purple-l:#ede9fe;
+  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;
+  --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;
+  --g800:#1f2937;--g900:#111827;
+  --fd:'Bricolage Grotesque',sans-serif;--fb:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--fb);background:var(--g50);color:var(--g800);min-height:100vh;}
+
+/* NAV */
+nav{background:#fff;border-bottom:1px solid var(--g200);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-weight:700;font-size:17px;color:var(--g900);}
+.nav-logo-icon{width:30px;height:30px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;}
+.nav-pill{background:var(--green-l);color:var(--green-d);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.5px;}
+.nav-r{display:flex;align-items:center;gap:12px;}
+.nav-btn{padding:7px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--g200);background:#fff;color:var(--g700);font-family:var(--fb);transition:all .15s;}
+.nav-btn:hover{border-color:var(--green);color:var(--green-d);}
+.nav-user{width:30px;height:30px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;}
+
+/* LAYOUT */
+.app{display:flex;min-height:calc(100vh - 58px);}
+
+/* SIDEBAR */
+aside{width:210px;background:#fff;border-right:1px solid var(--g200);padding:20px 0;flex-shrink:0;}
+.sb-lbl{font-size:10px;font-weight:700;color:var(--g400);letter-spacing:1px;text-transform:uppercase;padding:0 20px;margin:16px 0 6px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;margin:0 8px;border-radius:8px;font-size:13px;color:var(--g600);cursor:pointer;transition:all .15s;font-weight:400;}
+.sb-item:hover{background:var(--g100);color:var(--g800);}
+.sb-item.active{background:var(--green-l);color:var(--green-d);font-weight:600;}
+.sb-item .ico{font-size:14px;width:16px;text-align:center;}
+.sb-new{background:var(--green-l);color:var(--green-d);font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;}
+
+/* MAIN */
+main{flex:1;padding:28px 32px;max-width:1080px;}
+
+/* PAGE HEAD */
+.ph{margin-bottom:24px;}
+.bc{font-size:11.5px;color:var(--g400);margin-bottom:6px;}
+.bc b{color:var(--g600);}
+h1{font-family:var(--fd);font-size:24px;font-weight:800;color:var(--g900);margin-bottom:3px;}
+.psub{font-size:13.5px;color:var(--g500);font-weight:300;}
+
+/* TABS */
+.tabs{display:flex;gap:3px;background:var(--g100);border-radius:10px;padding:4px;margin-bottom:24px;width:fit-content;}
+.tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--g500);border:none;background:transparent;font-family:var(--fb);}
+.tab.active{background:#fff;color:var(--g900);box-shadow:0 1px 4px rgba(0,0,0,.1);font-weight:600;}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--g200);border-radius:12px;padding:22px;margin-bottom:18px;}
+.ct{font-family:var(--fd);font-size:14.5px;font-weight:700;color:var(--g800);margin-bottom:3px;display:flex;align-items:center;gap:7px;}
+.cs{font-size:12.5px;color:var(--g400);margin-bottom:18px;font-weight:300;}
+
+/* SCORE STRIP */
+.sstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px;}
+.sbox{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:15px 17px;}
+.sbox-lbl{font-size:10.5px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.sbox-val{font-family:var(--fd);font-size:24px;font-weight:800;line-height:1;}
+.sbox-meta{font-size:11.5px;color:var(--g400);margin-top:2px;}
+.sbox.hl{background:var(--green);border-color:var(--green);}
+.sbox.hl .sbox-lbl,.sbox.hl .sbox-meta{color:rgba(255,255,255,.7);}
+.sbox.hl .sbox-val{color:#fff;}
+
+/* INSIGHTS */
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.ib{border-radius:10px;padding:16px;border:1px solid transparent;}
+.ib.crit{background:#fff1f2;border-color:#fecdd3;}
+.ib.warn{background:var(--amber-l);border-color:#fde68a;}
+.ib.good{background:var(--green-l);border-color:#a7f3d0;}
+.ib .ii{font-size:20px;margin-bottom:7px;}
+.ib .itl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.ib.crit .itl{color:#be123c;}.ib.warn .itl{color:#92400e;}.ib.good .itl{color:var(--green-d);}
+.ib .itx{font-size:12.5px;color:var(--g700);line-height:1.5;}
+
+/* AI PANEL */
+.aip{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid var(--green-m);border-radius:12px;padding:20px 22px;margin-bottom:18px;position:relative;overflow:hidden;}
+.aip::before{content:'';position:absolute;top:-25px;right:-25px;width:90px;height:90px;background:radial-gradient(circle,rgba(5,150,105,.12) 0%,transparent 70%);}
+.aih{display:flex;align-items:center;gap:9px;margin-bottom:13px;}
+.ai-chip{background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
+.ai-ttl{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--g900);}
+.aipln{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+.pd{background:#fff;border-radius:8px;padding:13px;border:1px solid var(--g200);}
+.pd-lbl{font-size:10px;font-weight:700;color:var(--green-d);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.pd-ttl{font-size:13px;font-weight:600;color:var(--g800);margin-bottom:3px;}
+.pd-sub{font-size:11.5px;color:var(--g500);line-height:1.4;}
+
+/* TABLE */
+.stbl{width:100%;border-collapse:collapse;}
+.stbl th{font-size:10.5px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;padding:9px 11px;text-align:left;border-bottom:1px solid var(--g200);background:var(--g50);}
+.stbl td{padding:11px 11px;font-size:13px;border-bottom:1px solid var(--g100);vertical-align:middle;}
+.stbl tr:last-child td{border-bottom:none;}
+.stbl tr:hover td{background:var(--g50);}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;}
+.br{background:var(--red-l);color:#b91c1c;}.ba{background:var(--amber-l);color:#92400e;}.bg{background:var(--green-l);color:var(--green-d);}
+.mbar-w{display:flex;align-items:center;gap:7px;}
+.mbar{height:5px;border-radius:3px;background:var(--g200);width:75px;overflow:hidden;}
+.mbar-f{height:100%;border-radius:3px;transition:width .8s ease;}
+
+/* QUEUE */
+.sq{display:flex;flex-direction:column;gap:9px;}
+.sc{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:13px 17px;display:flex;align-items:center;gap:14px;transition:all .2s;cursor:pointer;}
+.sc:hover{border-color:var(--green);box-shadow:0 2px 10px rgba(5,150,105,.1);transform:translateX(3px);}
+.sc-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.sc-info{flex:1;}
+.sc-ttl{font-size:13.5px;font-weight:600;color:var(--g800);margin-bottom:2px;}
+.sc-meta{font-size:11.5px;color:var(--g400);}
+.sc-r{text-align:right;}
+.scd{font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px;margin-bottom:3px;display:inline-block;}
+.dh{background:var(--red-l);color:#b91c1c;}.dm{background:var(--amber-l);color:#92400e;}.de{background:var(--green-l);color:var(--green-d);}
+.sc-time{font-size:11px;color:var(--g400);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:var(--fb);}
+.btn-p{background:var(--green);color:#fff;}
+.btn-p:hover{background:var(--green-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(5,150,105,.28);}
+.btn-o{background:#fff;color:var(--g700);border:1.5px solid var(--g200);}
+.btn-o:hover{border-color:var(--green);color:var(--green-d);}
+.btn-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
+
+/* ═══════════════════════════════════════════
+   VARC AI SECTION
+═══════════════════════════════════════════ */
+.varc-layout{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start;}
+
+/* Passage panel */
+.passage-panel{background:#fff;border:1px solid var(--g200);border-radius:12px;overflow:hidden;}
+.pp-head{padding:16px 20px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;}
+.pp-head-l{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--g800);}
+.pp-head-r{display:flex;gap:8px;}
+.topic-chip{background:var(--blue-l);color:#1d4ed8;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.passage-body{padding:20px;font-size:13.5px;line-height:1.85;color:var(--g700);max-height:320px;overflow-y:auto;}
+.passage-body .para{margin-bottom:14px;}
+.passage-body .para:last-child{margin-bottom:0;}
+.para-num{font-size:10px;font-weight:700;color:var(--g400);letter-spacing:.5px;margin-bottom:4px;text-transform:uppercase;}
+.highlight-span{background:#fef9c3;border-bottom:2px solid #f59e0b;cursor:pointer;transition:background .15s;border-radius:2px;padding:0 1px;}
+.highlight-span:hover{background:#fde68a;}
+.highlight-span.cited{background:#d1fae5;border-bottom-color:var(--green);}
+
+/* Questions panel below passage */
+.qs-panel{background:#fff;border:1px solid var(--g200);border-radius:12px;margin-top:16px;overflow:hidden;}
+.qs-head{padding:14px 20px;border-bottom:1px solid var(--g200);font-family:var(--fd);font-size:13.5px;font-weight:700;color:var(--g800);}
+.q-item{padding:14px 20px;border-bottom:1px solid var(--g100);}
+.q-item:last-child{border-bottom:none;}
+.q-text{font-size:13px;color:var(--g700);margin-bottom:10px;line-height:1.5;}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.q-opt{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:7px;border:1.5px solid var(--g200);cursor:pointer;transition:all .15s;font-size:12.5px;color:var(--g700);}
+.q-opt:hover{border-color:var(--green);background:var(--green-l);}
+.q-opt.selected{border-color:var(--blue);background:var(--blue-l);color:#1e40af;}
+.q-opt.correct{border-color:var(--green);background:var(--green-l);color:var(--green-d);}
+.q-opt.wrong{border-color:var(--red);background:var(--red-l);color:#b91c1c;}
+.opt-lbl{width:20px;height:20px;border-radius:50%;background:var(--g200);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.q-opt.correct .opt-lbl{background:var(--green);color:#fff;}
+.q-opt.wrong .opt-lbl{background:var(--red);color:#fff;}
+.q-opt.selected .opt-lbl{background:var(--blue);color:#fff;}
+.ask-ai-btn{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:5px 12px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--purple);color:var(--purple);background:var(--purple-l);transition:all .15s;font-family:var(--fb);}
+.ask-ai-btn:hover{background:var(--purple);color:#fff;}
+
+/* RIGHT: AI chat + analysis */
+.varc-right{display:flex;flex-direction:column;gap:14px;}
+
+/* Tonality card */
+.ton-card{background:#fff;border:1px solid var(--g200);border-radius:12px;overflow:hidden;}
+.ton-head{padding:14px 18px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;}
+.ton-title{font-family:var(--fd);font-size:13.5px;font-weight:700;color:var(--g800);}
+.ton-badge{background:var(--purple-l);color:var(--purple);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.ton-body{padding:16px 18px;}
+.ton-row{margin-bottom:13px;}
+.ton-row:last-child{margin-bottom:0;}
+.ton-lbl{font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.ton-meter{height:6px;background:var(--g200);border-radius:3px;overflow:hidden;margin-bottom:3px;}
+.ton-fill{height:100%;border-radius:3px;}
+.ton-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.ton-tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.tt-g{background:var(--green-l);color:var(--green-d);}
+.tt-b{background:var(--blue-l);color:#1d4ed8;}
+.tt-p{background:var(--purple-l);color:#6d28d9;}
+.tt-a{background:var(--amber-l);color:#92400e;}
+.ton-quote{background:var(--g50);border-left:3px solid var(--g300);border-radius:0 6px 6px 0;padding:9px 13px;font-size:12px;color:var(--g600);font-style:italic;line-height:1.5;margin-top:8px;}
+
+/* AI Chat */
+.chat-card{background:#fff;border:1px solid var(--g200);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.chat-head{padding:13px 18px;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:9px;}
+.chat-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.chat-title{font-family:var(--fd);font-size:13.5px;font-weight:700;color:var(--g800);}
+.chat-sub{font-size:11px;color:var(--g400);}
+.chat-messages{padding:14px;height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:88%;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.msg-user{align-self:flex-end;background:var(--green);color:#fff;padding:9px 13px;border-radius:12px 12px 2px 12px;font-size:12.5px;line-height:1.5;}
+.msg-ai{align-self:flex-start;background:var(--g100);color:var(--g800);padding:9px 13px;border-radius:12px 12px 12px 2px;font-size:12.5px;line-height:1.6;}
+.msg-ai .cite-block{background:#fff;border:1px solid var(--g200);border-left:3px solid var(--green);border-radius:0 7px 7px 0;padding:7px 11px;margin-top:8px;font-size:11.5px;color:var(--g600);font-style:italic;}
+.msg-ai .cite-block .cite-lbl{font-size:10px;font-weight:700;color:var(--green-d);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;font-style:normal;}
+.msg-ai strong{color:var(--g900);}
+.msg-ai .why-tag{display:inline-block;background:var(--red-l);color:#b91c1c;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:4px;margin-right:4px;}
+.msg-ai .right-tag{display:inline-block;background:var(--green-l);color:var(--green-d);font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:4px;margin-right:4px;}
+.typing{display:flex;gap:4px;align-items:center;padding:10px 14px;}
+.typing span{width:7px;height:7px;background:var(--g400);border-radius:50%;animation:bounce .8s infinite;}
+.typing span:nth-child(2){animation-delay:.15s;}
+.typing span:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-6px);}}
+.chat-input-row{padding:12px;border-top:1px solid var(--g200);display:flex;gap:8px;}
+.chat-input{flex:1;border:1.5px solid var(--g200);border-radius:8px;padding:8px 12px;font-size:12.5px;font-family:var(--fb);outline:none;transition:border .15s;resize:none;}
+.chat-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(5,150,105,.1);}
+.chat-send{padding:8px 14px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;transition:all .15s;}
+.chat-send:hover{background:var(--green-d);}
+.quick-asks{padding:0 12px 10px;display:flex;gap:6px;flex-wrap:wrap;}
+.qa-chip{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--g200);background:#fff;color:var(--g600);cursor:pointer;transition:all .15s;font-family:var(--fb);}
+.qa-chip:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-l);}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.modal-ov.open{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:28px;width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.14);}
+.modal h2{font-family:var(--fd);font-size:19px;font-weight:700;margin-bottom:5px;}
+.modal-sub{font-size:12.5px;color:var(--g400);margin-bottom:22px;}
+.mc{float:right;background:none;border:none;font-size:19px;cursor:pointer;color:var(--g400);margin-top:-3px;}
+.mc:hover{color:var(--g700);}
+.ig2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.inp-g{display:flex;flex-direction:column;gap:5px;}
+.inp-g label{font-size:10.5px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;}
+.inp-g input,.inp-g select{border:1.5px solid var(--g200);border-radius:7px;padding:8px 11px;font-size:13.5px;font-family:var(--fb);color:var(--g800);outline:none;transition:border .15s;background:#fff;}
+.inp-g input:focus,.inp-g select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(5,150,105,.1);}
+
+/* INTEGRATION NOTE */
+.inote{background:#fff;border:1px solid var(--g200);border-left:4px solid var(--green);border-radius:8px;padding:14px 18px;margin-top:24px;font-size:12.5px;color:var(--g600);line-height:1.6;}
+.inote strong{color:var(--g800);}
+
+/* SCREEN */
+.screen{display:none;}.screen.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+.ani{animation:fi .3s ease forwards;}
+
+/* HEATMAP */
+.hmap{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+.hmc{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;cursor:pointer;transition:transform .15s;}
+.hmc:hover{transform:scale(1.1);}
+.h0{background:var(--g100);color:var(--g400);}.h1{background:#bbf7d0;color:#166534;}.h2{background:#4ade80;color:#14532d;}.h3{background:#16a34a;color:#fff;}.h4{background:#15803d;color:#fff;}
+
+/* PULSE */
+@keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(5,150,105,.3);}50%{box-shadow:0 0 0 8px rgba(5,150,105,0);}}
+.pulse{animation:pg 2s infinite;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🎯</div>
+    Optima Learn
+    <div class="nav-pill">PROTOTYPE</div>
+  </div>
+  <div class="nav-r">
+    <button class="nav-btn" onclick="openModal()">📥 Log Mock</button>
+    <div class="nav-user">K</div>
+  </div>
+</nav>
+
+<div class="app">
+<!-- SIDEBAR -->
+<aside>
+  <div class="sb-lbl">Main</div>
+  <div class="sb-item"><span class="ico">🏠</span>Home</div>
+  <div class="sb-item"><span class="ico">📅</span>Planner</div>
+  <div class="sb-item"><span class="ico">📚</span>Subjects</div>
+  <div class="sb-item"><span class="ico">🧩</span>Quiz Builder</div>
+  <div class="sb-item" id="sb-dilr" onclick="showSection('dilr',this)"><span class="ico">🔬</span>DILR Engine</div>
+  <div class="sb-item active" id="sb-varc" onclick="showSection('varc',this)"><span class="ico">📖</span>VARC AI <span class="sb-new">New</span></div>
+  <div class="sb-lbl">Analytics</div>
+  <div class="sb-item"><span class="ico">📊</span>Progress Report</div>
+  <div class="sb-item"><span class="ico">🕐</span>Test History</div>
+  <div class="sb-lbl">Other</div>
+  <div class="sb-item"><span class="ico">🔖</span>Bookmarks</div>
+  <div class="sb-item"><span class="ico">📋</span>PYQ's</div>
+  <div class="sb-item"><span class="ico">💬</span>GDPI <span class="sb-new">New</span></div>
+</aside>
+
+<main>
+
+<!-- ═══════ VARC AI SECTION (default) ═══════ -->
+<div id="sec-varc" class="screen active">
+  <div class="ph ani">
+    <div class="bc">Home › Subjects › <b>VARC AI Explainer</b></div>
+    <h1>VARC AI Explainer 🧠</h1>
+    <p class="psub">Understand <em>why</em> your answer is wrong — with passage citations, author tone analysis, and AI reasoning.</p>
+  </div>
+
+  <div class="varc-layout">
+    <!-- LEFT: PASSAGE + QUESTIONS -->
+    <div>
+      <div class="passage-panel ani">
+        <div class="pp-head">
+          <div class="pp-head-l">📄 RC Passage — Philosophy & Ethics</div>
+          <div class="pp-head-r">
+            <span class="topic-chip">CAT 2023 Level</span>
+            <button class="btn btn-o" style="padding:5px 12px;font-size:11.5px;" onclick="loadNewPassage()">New Passage ↻</button>
+          </div>
+        </div>
+        <div class="passage-body" id="passage-text">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <div class="qs-panel ani">
+        <div class="qs-head">Questions — Select your answer, then ask AI why you're wrong</div>
+        <div id="questions-container">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: TONALITY + CHAT -->
+    <div class="varc-right">
+
+      <!-- TONALITY CARD -->
+      <div class="ton-card ani">
+        <div class="ton-head">
+          <div class="ton-title">✦ Author Analysis</div>
+          <div class="ton-badge">AI-Generated</div>
+        </div>
+        <div class="ton-body" id="ton-body">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- AI CHAT -->
+      <div class="chat-card ani">
+        <div class="chat-head">
+          <div class="chat-dot"></div>
+          <div>
+            <div class="chat-title">VARC AI Tutor</div>
+            <div class="chat-sub">Ask why any answer is right or wrong</div>
+          </div>
+        </div>
+        <div class="quick-asks" id="quick-asks">
+          <div class="qa-chip" onclick="quickAsk('Why is option B wrong for Q1?')">Why is B wrong for Q1?</div>
+          <div class="qa-chip" onclick="quickAsk('What is the author\'s main argument?')">Author\'s main argument?</div>
+          <div class="qa-chip" onclick="quickAsk('Why is option D correct for Q2?')">Why is D correct for Q2?</div>
+          <div class="qa-chip" onclick="quickAsk('Explain the tone of paragraph 2')">Tone of Para 2?</div>
+        </div>
+        <div class="chat-messages" id="chat-msgs">
+          <div class="msg msg-ai">
+            👋 Hi! I've read this passage carefully. Ask me <strong>why any option is right or wrong</strong>, and I'll explain with specific references from the text. Try: <em>"Why is option A wrong for Q1?"</em>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chat-inp" rows="2" placeholder="e.g. Why is option C wrong? / What does paragraph 3 imply?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="inote">
+    <strong>🔗 Integration Note (VARC AI):</strong> This feature lives under <strong>Subjects → VARC → RC Verse</strong> in Optima Learn. Each passage is indexed with paragraph-level metadata. The AI layer (Claude/GPT-4o) has the full passage in context and can cite specific lines when explaining why an option is wrong. <em>Built on insight from Sajal Mittal & Vaibhav Shrivastava: "English is not black or white — we need to know WHY an option is wrong, not just which is right."</em>
+  </div>
+</div>
+
+<!-- ═══════ DILR ENGINE SECTION ═══════ -->
+<div id="sec-dilr" class="screen">
+  <div class="ph ani">
+    <div class="bc">Home › Subjects › <b>DILR Diagnostic Engine</b></div>
+    <h1>DILR Diagnostic Engine 🔬</h1>
+    <p class="psub">AI-powered weak-set detection. Practice what actually hurts your score.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dd','dashboard',this)">Dashboard</button>
+    <button class="tab" onclick="switchTab('dd','queue',this)">Practice Queue</button>
+    <button class="tab" onclick="switchTab('dd','history',this)">Mock History</button>
+  </div>
+
+  <div id="dd-dashboard" class="screen active">
+    <div class="sstrip ani">
+      <div class="sbox hl"><div class="sbox-lbl">Last Mock Score</div><div class="sbox-val">44.76</div><div class="sbox-meta">Scaled · CAT 2024 Slot 2</div></div>
+      <div class="sbox"><div class="sbox-lbl">Percentile Est.</div><div class="sbox-val" style="color:var(--green);">99.72</div><div class="sbox-meta">Based on score</div></div>
+      <div class="sbox"><div class="sbox-lbl">Sets Attempted</div><div class="sbox-val">3 / 4</div><div class="sbox-meta">Avg per mock</div></div>
+      <div class="sbox"><div class="sbox-lbl">Weak Set Type</div><div class="sbox-val" style="font-size:15px;color:var(--red);">Network Flow</div><div class="sbox-meta">AI-identified · this week</div></div>
+    </div>
+    <div class="ig ani">
+      <div class="ib crit"><div class="ii">🚨</div><div class="itl">Critical Weakness</div><div class="itx">You spend <strong>18+ min</strong> on Network Flow sets but solve only 1.2 questions correctly. Skip these — attempt Games & Tournaments instead.</div></div>
+      <div class="ib warn"><div class="ii">⚡</div><div class="itl">Time Leak</div><div class="itx">Set-selection window averages <strong>4.5 min</strong> — 2× recommended. You're reading full sets before deciding. Scan only first 2 lines.</div></div>
+      <div class="ib good"><div class="ii">✅</div><div class="itl">Strength to Exploit</div><div class="itx">Arrangement & Sequencing: <strong>87% accuracy</strong> across last 5 mocks. Always pick this first — guaranteed 8–12 marks.</div></div>
+    </div>
+    <div class="aip ani">
+      <div class="aih"><div class="ai-chip">✦ AI Plan</div><div class="ai-ttl">Your 3-Day DILR Sprint</div></div>
+      <div class="aipln">
+        <div class="pd"><div class="pd-lbl">Day 1 — Today</div><div class="pd-ttl">Set Selection Drill</div><div class="pd-sub">4 sets · 2-min scan each · decide without solving.</div></div>
+        <div class="pd"><div class="pd-lbl">Day 2 — Tomorrow</div><div class="pd-ttl">Arrangement Deep Dive</div><div class="pd-sub">6 high-difficulty Arrangement sets. Cement 95%+ accuracy.</div></div>
+        <div class="pd"><div class="pd-lbl">Day 3</div><div class="pd-ttl">Network Flow Exposure</div><div class="pd-sub">2 easy Network sets — not to master, just learn the skip signal.</div></div>
+      </div>
+    </div>
+    <div class="card ani">
+      <div class="ct">📊 Set Type Performance</div>
+      <div class="cs">Across last 6 mocks · Click row to add to practice queue</div>
+      <table class="stbl"><thead><tr><th>Set Type</th><th>Attempts</th><th>Accuracy</th><th>Avg Time</th><th>Trend</th><th>Status</th></tr></thead>
+      <tbody id="dtbody"></tbody></table>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div class="card ani"><div class="ct">🎯 Accuracy Radar</div><div class="cs">By set type</div><canvas id="rc" width="260" height="260"></canvas></div>
+      <div class="card ani"><div class="ct">🔥 Practice Consistency</div><div class="cs">Sets per day · last 4 weeks</div><div class="hmap" id="hmap"></div></div>
+    </div>
+  </div>
+
+  <div id="dd-queue" class="screen">
+    <div class="card">
+      <div class="ct">🎯 AI-Curated Practice Queue</div><div class="cs">Prioritised by your weakness · 8 sets ready</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn btn-o" style="font-size:12px;padding:5px 11px;" onclick="rq('all')">All</button>
+        <button class="btn btn-o" style="font-size:12px;padding:5px 11px;" onclick="rq('hard')">🚨 Critical</button>
+        <button class="btn btn-o" style="font-size:12px;padding:5px 11px;" onclick="rq('med')">⚡ Improve</button>
+        <button class="btn btn-o" style="font-size:12px;padding:5px 11px;" onclick="rq('easy')">✅ Strengths</button>
+      </div>
+      <div class="sq" id="sqlist"></div>
+    </div>
+  </div>
+
+  <div id="dd-history" class="screen">
+    <div class="card">
+      <div class="ct">📋 Mock History</div><div class="cs">All logged DILR sessions</div>
+      <table class="stbl"><thead><tr><th>Date</th><th>Mock</th><th>Sets</th><th>Score</th><th>Time</th><th>Key Issue</th></tr></thead>
+      <tbody id="htbody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="inote">
+    <strong>🔗 Integration Note (DILR):</strong> Lives under <strong>Subjects → DILR</strong>. Mock scores feed from Quiz Builder's test history API. AI classifies set types from question text and computes weakness vectors. <em>Built on insight from 7/16 interviews: "Pattern-wise DILR sets are the #1 unmet need."</em>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal">
+  <div class="modal">
+    <button class="mc" onclick="closeModal()">✕</button>
+    <h2>📥 Log New Mock</h2>
+    <p class="modal-sub">Update your DILR diagnostic with latest performance</p>
+    <div class="ig2" style="margin-bottom:14px;">
+      <div class="inp-g"><label>Mock Name</label><input id="mn" placeholder="e.g. CL Mock 15"/></div>
+      <div class="inp-g"><label>Date</label><input type="date" id="md"/></div>
+    </div>
+    <div style="font-size:12.5px;font-weight:600;color:var(--g600);margin-bottom:10px;">Set Performance</div>
+    <div id="srows"></div>
+    <button class="btn btn-o" style="font-size:11.5px;padding:5px 11px;margin-bottom:16px;" onclick="addSRow()">+ Add Set</button>
+    <div class="ig2" style="margin-bottom:20px;">
+      <div class="inp-g"><label>Total Time (min)</label><input type="number" id="tt" value="38"/></div>
+      <div class="inp-g"><label>Set Selection Time</label><input type="number" id="st" value="4"/></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-p pulse" onclick="submitMock()">✦ Analyse & Update</button>
+      <button class="btn btn-o" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════ DATA ═══════════════════════
+const PASSAGE = {
+  topic:"Philosophy & Ethics",
+  paras:[
+    {id:"P1", text:"The question of whether moral progress is real has troubled philosophers for centuries. Unlike scientific progress, which can be measured by the accumulation of verified knowledge and technological capability, moral progress resists easy quantification. Yet the historical record suggests that something has changed: practices once considered acceptable — slavery, public torture, the disenfranchisement of women — are now widely condemned. Whether this constitutes genuine moral progress or merely a shift in cultural preferences remains deeply contested."},
+    {id:"P2", text:"Moral realists argue that these changes reflect our growing recognition of objective moral truths. On this view, abolitionists did not simply prefer a different social arrangement; they were <span class='highlight-span' data-ref='P2-1'>correct in a way that slaveholders were not</span>. The expansion of the moral circle — the gradual inclusion of previously excluded groups within the scope of moral concern — is, on this account, analogous to the expansion of scientific knowledge. We are getting closer to the truth, even if we cannot see it fully."},
+    {id:"P3", text:"Anti-realists, however, dispute this framing. They contend that moral judgments express attitudes rather than describe facts, and that calling past practices 'wrong' simply means we disapprove of them now. The appearance of progress is, on this view, <span class='highlight-span' data-ref='P3-1'>an artifact of presentism</span> — the tendency to evaluate the past by the standards of the present. This does not make moral discourse meaningless, but it does mean that the language of progress must be understood as rhetorical rather than descriptive."},
+    {id:"P4", text:"A third position, associated with pragmatism, sidesteps the realism debate altogether. What matters, pragmatists argue, is not whether moral judgments track objective facts but whether they serve human flourishing. <span class='highlight-span' data-ref='P4-1'>Moral progress, on this account, is real because its effects are real</span>: fewer people suffer, more people participate in decisions that affect their lives, and the grounds for exclusion have become harder to defend. The pragmatist is not troubled by the absence of a metaphysical anchor for moral claims, because the anchor is found in practice, not theory."}
+  ],
+  questions:[
+    {
+      id:"Q1",
+      text:"The author uses the phrase 'expansion of the moral circle' (Paragraph 2) most likely to suggest that:",
+      opts:[
+        {lbl:"A", text:"Human beings have an innate capacity for empathy that grows over time."},
+        {lbl:"B", text:"Moral realists believe that the scope of moral concern has progressively widened to include more beings."},
+        {lbl:"C", text:"The circle metaphor implies a clear boundary between those deserving moral concern and those who do not."},
+        {lbl:"D", text:"Scientific progress has directly influenced our moral judgments about excluded groups."}
+      ],
+      correct:"B",
+      explanations:{
+        A:{wrong:true, why:"This option introduces 'innate empathy' — a psychological concept the passage never discusses. The author is describing a philosophical position (moral realism), not making a claim about human psychology. The passage attributes the expansion to our 'growing recognition of objective moral truths', which is an epistemological claim, not a biological one.", cite:"P2-1"},
+        B:{wrong:false, why:"Correct. The phrase appears within the moral realist argument, where the author explicitly links it to the idea that we are 'getting closer to the truth'. The expansion of who we include in moral concern is presented as analogous to scientific progress — we are recognising more of what was always true.", cite:null},
+        C:{wrong:true, why:"This misreads the metaphor. The word 'circle' here is used to suggest inclusion and growth, not to imply a sharp exclusionary boundary. The passage's tone around this phrase is optimistic and progressive, not demarcatory. Option C inverts the author's intent.", cite:"P2-1"},
+        D:{wrong:true, why:"The passage explicitly separates moral progress from scientific progress in Paragraph 1 ('Unlike scientific progress'). Option D collapses this distinction. The author never claims that science has influenced moral judgments — that is a causal claim the passage does not make.", cite:null}
+      }
+    },
+    {
+      id:"Q2",
+      text:"Which of the following best describes the anti-realist's objection to the concept of moral progress?",
+      opts:[
+        {lbl:"A", text:"Moral progress is impossible because human nature does not change."},
+        {lbl:"B", text:"What appears to be progress is merely a reflection of present-day biases being projected onto the past."},
+        {lbl:"C", text:"Anti-realists believe moral discourse is entirely meaningless and should be abandoned."},
+        {lbl:"D", text:"Scientific methods should be used to evaluate whether moral progress has occurred."}
+      ],
+      correct:"B",
+      explanations:{
+        A:{wrong:true, why:"The anti-realist argument is about the nature of moral judgments (that they express attitudes, not facts), not about whether human nature changes. Option A makes a claim about human nature that the passage never attributes to anti-realists. This is a distractor that sounds plausible but introduces content absent from the text.", cite:null},
+        B:{wrong:false, why:"Correct. This is a direct paraphrase of 'presentism' as described in Paragraph 3 — the tendency to evaluate the past by current standards. The author says anti-realists see the appearance of progress as 'an artifact of presentism', which is exactly what Option B describes.", cite:"P3-1"},
+        C:{wrong:true, why:"The passage explicitly guards against this interpretation: 'This does not make moral discourse meaningless'. Option C contradicts the text directly. This is a classic CAT trap — taking a position to an extreme the author deliberately rules out.", cite:"P3-1"},
+        D:{wrong:true, why:"This is the moral realist's analogy (Paragraph 2 draws a parallel with scientific knowledge), not the anti-realist position. Option D conflates two opposing positions in the passage. Always track which argument belongs to which camp.", cite:null}
+      }
+    }
+  ]
+};
+
+const TONALITY = {
+  stance:"Neutral-Analytical",
+  tone_meter:60,
+  certainty:45,
+  complexity:78,
+  tags:["Expository","Multi-perspective","Balanced","Academic","Non-prescriptive"],
+  dominant_device:"Comparative analysis of three philosophical positions without endorsing any",
+  quote:"P1",
+  quote_text:"Unlike scientific progress, which can be measured... moral progress resists easy quantification.",
+  inference:"The author presents all three views (realist, anti-realist, pragmatist) with equal weight. This is a signal for CAT: no option that says 'the author agrees with X position' is likely correct."
+};
+
+// ═══════════════════════ PASSAGE RENDER ═══════════════════════
+function renderPassage(){
+  const el = document.getElementById('passage-text');
+  el.innerHTML = PASSAGE.paras.map(p=>`
+    <div class="para"><div class="para-num">${p.id}</div>${p.text}</div>
+  `).join('');
+}
+
+function renderTonality(){
+  const el = document.getElementById('ton-body');
+  const tc = TONALITY.tone_meter > 70 ? '#ef4444' : TONALITY.tone_meter > 40 ? '#f59e0b' : '#059669';
+  el.innerHTML = `
+    <div class="ton-row">
+      <div class="ton-lbl">Author Stance</div>
+      <div class="ton-tags"><span class="ton-tag tt-b">${TONALITY.stance}</span></div>
+    </div>
+    <div class="ton-row">
+      <div class="ton-lbl">Tone Intensity <span style="float:right;font-size:11px;color:var(--g500);">${TONALITY.tone_meter}%</span></div>
+      <div class="ton-meter"><div class="ton-fill" style="width:${TONALITY.tone_meter}%;background:${tc};"></div></div>
+    </div>
+    <div class="ton-row">
+      <div class="ton-lbl">Argument Certainty <span style="float:right;font-size:11px;color:var(--g500);">${TONALITY.certainty}%</span></div>
+      <div class="ton-meter"><div class="ton-fill" style="width:${TONALITY.certainty}%;background:#3b82f6;"></div></div>
+    </div>
+    <div class="ton-row">
+      <div class="ton-lbl">Lexical Complexity <span style="float:right;font-size:11px;color:var(--g500);">${TONALITY.complexity}%</span></div>
+      <div class="ton-meter"><div class="ton-fill" style="width:${TONALITY.complexity}%;background:#8b5cf6;"></div></div>
+    </div>
+    <div class="ton-row">
+      <div class="ton-lbl">Style Tags</div>
+      <div class="ton-tags">${TONALITY.tags.map(t=>`<span class="ton-tag tt-p">${t}</span>`).join('')}</div>
+    </div>
+    <div class="ton-row">
+      <div class="ton-lbl">Dominant Device</div>
+      <div class="ton-tags"><span class="ton-tag tt-g">${TONALITY.dominant_device}</span></div>
+    </div>
+    <div class="ton-quote">
+      <div style="font-size:10px;font-weight:700;color:var(--green-d);margin-bottom:4px;font-style:normal;">KEY SENTENCE (Para 1)</div>
+      "${TONALITY.quote_text}"
+    </div>
+    <div style="margin-top:10px;background:var(--amber-l);border-radius:7px;padding:10px 12px;font-size:12px;color:#92400e;line-height:1.5;">
+      <strong>⚡ CAT Tip:</strong> ${TONALITY.inference}
+    </div>`;
+}
+
+function renderQuestions(){
+  const el = document.getElementById('questions-container');
+  el.innerHTML = PASSAGE.questions.map((q,qi)=>`
+    <div class="q-item" id="qi-${q.id}">
+      <div class="q-text"><strong>${q.id}.</strong> ${q.text}</div>
+      <div class="q-opts">
+        ${q.opts.map(o=>`
+          <div class="q-opt" id="opt-${q.id}-${o.lbl}" onclick="selectOpt('${q.id}','${o.lbl}')">
+            <div class="opt-lbl">${o.lbl}</div>
+            <div>${o.text}</div>
+          </div>`).join('')}
+      </div>
+      <button class="ask-ai-btn" onclick="askWhyWrong('${q.id}')">✦ Ask AI — Why is my answer wrong?</button>
+    </div>`).join('');
+}
+
+let selected = {};
+function selectOpt(qid, lbl){
+  // clear previous selection for this question
+  PASSAGE.questions.find(q=>q.id===qid).opts.forEach(o=>{
+    const el = document.getElementById(`opt-${qid}-${o.lbl}`);
+    el.classList.remove('selected','correct','wrong');
+    el.querySelector('.opt-lbl').style.background='';
+    el.querySelector('.opt-lbl').style.color='';
+  });
+  selected[qid] = lbl;
+  document.getElementById(`opt-${qid}-${lbl}`).classList.add('selected');
+}
+
+function askWhyWrong(qid){
+  const q = PASSAGE.questions.find(q=>q.id===qid);
+  const userAns = selected[qid];
+  if(!userAns){ quickAsk(`Why is the correct answer for ${qid} what it is?`); return; }
+
+  // Reveal answers visually
+  q.opts.forEach(o=>{
+    const el = document.getElementById(`opt-${qid}-${o.lbl}`);
+    el.classList.remove('selected','correct','wrong');
+    if(o.lbl === q.correct) el.classList.add('correct');
+    else if(o.lbl === userAns && userAns !== q.correct) el.classList.add('wrong');
+  });
+
+  if(userAns === q.correct){
+    quickAsk(`I got ${qid} correct (Option ${userAns}). Why exactly is this the right answer?`);
+  } else {
+    quickAsk(`I chose Option ${userAns} for ${qid} but the answer is ${q.correct}. Why is ${userAns} wrong?`);
+  }
+}
+
+// ═══════════════════════ AI CHAT ═══════════════════════
+const AI_RESPONSES = {
+  "why is option b wrong for q1": ()=>buildResponse("Q1","B"),
+  "why is option a wrong for q1": ()=>buildResponse("Q1","A"),
+  "why is option c wrong for q1": ()=>buildResponse("Q1","C"),
+  "why is option d wrong for q1": ()=>buildResponse("Q1","D"),
+  "why is option a wrong for q2": ()=>buildResponse("Q2","A"),
+  "why is option c wrong for q2": ()=>buildResponse("Q2","C"),
+  "why is option d wrong for q2": ()=>buildResponse("Q2","D"),
+  "why is option b wrong for q2": ()=>buildResponse("Q2","B"),
+};
+
+function buildResponse(qid, lbl){
+  const q = PASSAGE.questions.find(q=>q.id===qid);
+  const exp = q.explanations[lbl];
+  const isWrong = exp.wrong;
+  const cite = exp.cite;
+  let citeHtml = '';
+  if(cite){
+    const paraId = cite.split('-')[0];
+    const para = PASSAGE.paras.find(p=>p.id===paraId);
+    if(para){
+      const stripped = para.text.replace(/<[^>]+>/g,'');
+      const snippet = stripped.substring(0,120)+'...';
+      citeHtml = `<div class="cite-block"><div class="cite-lbl">📍 Passage Reference — ${paraId}</div>"${snippet}"</div>`;
+    }
+  }
+  const tag = isWrong
+    ? `<span class="why-tag">❌ Why ${lbl} is Wrong</span>`
+    : `<span class="right-tag">✅ Why ${lbl} is Correct</span>`;
+
+  return `${tag}<br><br>${exp.why}${citeHtml}`;
+}
+
+function getAIReply(msg){
+  const lower = msg.toLowerCase();
+
+  // Pattern match for wrong/correct questions
+  const qMatch = lower.match(/option\s([a-d]).*?(q[12])/i) || lower.match(/(q[12]).*?option\s([a-d])/i);
+  if(qMatch){
+    const lbl = (qMatch[1].length===1 ? qMatch[1] : qMatch[2]).toUpperCase();
+    const qid = (qMatch[1].length===2 ? qMatch[1] : qMatch[2]).toUpperCase();
+    if(['Q1','Q2'].includes(qid) && ['A','B','C','D'].includes(lbl)){
+      return buildResponse(qid, lbl);
+    }
+  }
+
+  // Correct answer queries
+  if(lower.includes('correct') && lower.includes('q1')) return buildResponse('Q1','B');
+  if(lower.includes('correct') && lower.includes('q2')) return buildResponse('Q2','B');
+
+  // Tone/author queries
+  if(lower.includes('tone') || lower.includes('author') || lower.includes('stance')){
+    return `<strong>Author Tone Analysis:</strong><br><br>The author's tone is <span class="right-tag">Neutral-Analytical</span>. Key signals:<br><br>
+    1️⃣ <strong>No endorsement:</strong> All three positions (realist, anti-realist, pragmatist) are presented with equal weight.<br>
+    2️⃣ <strong>Hedging language:</strong> "remains deeply contested", "on this view", "on this account" — the author constantly attributes claims to specific camps, not to themselves.<br>
+    3️⃣ <strong>Structural balance:</strong> Paragraph 1 sets up the problem. Paragraphs 2, 3, 4 each give one position exactly one paragraph.<br>
+    <div class="cite-block"><div class="cite-lbl">📍 Evidence — Para 1</div>"moral progress resists easy quantification" — the author doesn't resolve this, they only map the debate.</div>
+    <br><strong>⚡ CAT Implication:</strong> Any option that says "the author believes X is correct" is almost certainly wrong for this passage.`;
+  }
+
+  if(lower.includes('main argument') || lower.includes('central idea') || lower.includes('passage about')){
+    return `<strong>Central Idea:</strong><br><br>The passage maps three philosophical responses to the question: <em>"Is moral progress real?"</em><br><br>
+    • <strong>Moral Realists</strong> (Para 2): Yes — we're getting closer to objective moral truths.<br>
+    • <strong>Anti-Realists</strong> (Para 3): No — it's just presentism, we're projecting current attitudes onto history.<br>
+    • <strong>Pragmatists</strong> (Para 4): Yes, but not because of metaphysics — because its effects are real.<br>
+    <div class="cite-block"><div class="cite-lbl">📍 Key Structural Signal — Para 1</div>"Whether this constitutes genuine moral progress or merely a shift in cultural preferences remains deeply contested."</div>
+    This sentence in Para 1 is the <strong>thesis of the passage</strong> — it signals the author will explore, not resolve, this tension.`;
+  }
+
+  if(lower.includes('para') || lower.includes('paragraph')){
+    const pnum = lower.match(/para(?:graph)?\s*(\d)/)?.[1];
+    if(pnum==='2') return `<strong>Paragraph 2 Analysis:</strong><br><br>This paragraph presents the <strong>moral realist</strong> position. Tone here is slightly more optimistic — words like "correct", "growing recognition", "getting closer to the truth" signal a progressive worldview. The analogy to scientific progress is the key structural move: it makes moral progress sound empirical and objective.<br><br><span class="why-tag">CAT Trap:</span> Questions may ask you to identify what the <em>realist</em> believes vs. what the <em>author</em> believes. They are not the same — the author is reporting, not endorsing.`;
+    if(pnum==='3') return `<strong>Paragraph 3 Analysis:</strong><br><br>This paragraph presents the <strong>anti-realist</strong> counter. Tone shifts to skeptical. Key term: <strong>"presentism"</strong> — defined as evaluating the past by present-day standards. The anti-realist doesn't say morality is meaningless, just that "progress" is the wrong word.<br><br><span class="right-tag">Important:</span> The passage explicitly says this "does not make moral discourse meaningless" — any option claiming anti-realists think morality is pointless is wrong.`;
+    if(pnum==='4') return `<strong>Paragraph 4 Analysis:</strong><br><br>The <strong>pragmatist</strong> position sidesteps the realism debate. It's the most practical of the three — it says what matters is real-world outcomes (fewer people suffer, more people participate). Tone here is constructive and resolution-oriented, without being prescriptive.<br><br>The phrase <span style="background:#fef9c3;padding:0 3px;border-radius:2px;">"the anchor is found in practice, not theory"</span> is a high-probability quote question source.`;
+  }
+
+  return `I can help you understand this passage deeply! Try asking:<br><br>
+  • <em>"Why is Option [A/B/C/D] wrong for Q1?"</em><br>
+  • <em>"Why is Option [A/B/C/D] correct for Q2?"</em><br>
+  • <em>"What is the author's tone?"</em><br>
+  • <em>"Explain the central idea"</em><br>
+  • <em>"Analyse paragraph 3"</em><br><br>
+  I'll always cite the specific part of the passage that proves my explanation.`;
+}
+
+function sendChat(){
+  const inp = document.getElementById('chat-inp');
+  const msg = inp.value.trim();
+  if(!msg) return;
+  inp.value = '';
+  addMsg(msg, 'user');
+  const typing = addTyping();
+  setTimeout(()=>{
+    typing.remove();
+    addMsg(getAIReply(msg), 'ai');
+    scrollChat();
+  }, 900 + Math.random()*500);
+}
+
+function quickAsk(msg){
+  document.getElementById('chat-inp').value = msg;
+  sendChat();
+  // scroll to chat
+  document.querySelector('.chat-card').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function addMsg(text, role){
+  const el = document.createElement('div');
+  el.className = `msg msg-${role}`;
+  el.innerHTML = text;
+  document.getElementById('chat-msgs').appendChild(el);
+  scrollChat();
+}
+
+function addTyping(){
+  const el = document.createElement('div');
+  el.className = 'msg msg-ai';
+  el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  document.getElementById('chat-msgs').appendChild(el);
+  scrollChat();
+  return el;
+}
+
+function scrollChat(){
+  const el = document.getElementById('chat-msgs');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ═══════════════════════ DILR DATA ═══════════════════════
+const SET_TYPES=[
+  {name:"Arrangement & Sequencing",attempts:18,accuracy:87,avgTime:11,trend:"+5%",status:"strong"},
+  {name:"Games & Tournaments",attempts:14,accuracy:74,avgTime:13,trend:"+2%",status:"improve"},
+  {name:"Tables & Caselets",attempts:12,accuracy:70,avgTime:14,trend:"0%",status:"improve"},
+  {name:"Network Flow / Routes",attempts:8,accuracy:28,avgTime:18,trend:"-3%",status:"critical"},
+  {name:"Grid / Matrix Logic",attempts:10,accuracy:62,avgTime:12,trend:"+8%",status:"improve"},
+  {name:"Bars / Charts (DI)",attempts:16,accuracy:81,avgTime:10,trend:"+3%",status:"strong"},
+  {name:"Mixed / Hybrid Sets",attempts:6,accuracy:45,avgTime:16,trend:"-1%",status:"critical"},
+];
+const QUEUE=[
+  {type:"Network Flow / Routes",title:"City Route Optimization",desc:"6 cities, 4 connections — CAT 2022 pattern",diff:"hard",time:"12 min",ico:"🔗",col:"#fee2e2"},
+  {type:"Network Flow / Routes",title:"Logistics Network Problem",desc:"Warehouse-to-delivery flow — IMS 2024",diff:"hard",time:"14 min",ico:"🔗",col:"#fee2e2"},
+  {type:"Mixed / Hybrid Sets",title:"Scoring + Arrangement",desc:"Mixed tournament with seating — CL 2025",diff:"hard",time:"15 min",ico:"🧩",col:"#fee2e2"},
+  {type:"Grid / Matrix Logic",title:"5×5 Binary Grid",desc:"Row/col constraints — CAT 2021",diff:"med",time:"11 min",ico:"⬛",col:"#fef3c7"},
+  {type:"Games & Tournaments",title:"Round Robin Knockout",desc:"10-team knockout — Cracku Daily",diff:"med",time:"12 min",ico:"🏆",col:"#fef3c7"},
+  {type:"Tables & Caselets",title:"Revenue Split Caselet",desc:"4-company revenue — IMS Mock",diff:"med",time:"10 min",ico:"📊",col:"#fef3c7"},
+  {type:"Arrangement & Sequencing",title:"7-Person Linear",desc:"Classic constraint-based — exploit your strength",diff:"easy",time:"9 min",ico:"📐",col:"#d1fae5"},
+  {type:"Bars / Charts (DI)",title:"Stacked Bar DI",desc:"4-year multi-category — fast solve",diff:"easy",time:"8 min",ico:"📈",col:"#d1fae5"},
+];
+const HISTORY=[
+  {date:"02 Apr 2026",name:"CL Mock 14",sets:"3/4",score:"44.76",time:"38 min",issue:"Picked Network Flow — wasted 16 min"},
+  {date:"29 Mar 2026",name:"CL Mock 13",sets:"3/4",score:"38.20",time:"42 min",issue:"Set selection took 5 min"},
+  {date:"25 Mar 2026",name:"CAT 2023 Slot 1",sets:"4/4",score:"41.50",time:"40 min",issue:"Last set incomplete"},
+  {date:"20 Mar 2026",name:"IMS Mock 8",sets:"2/4",score:"29.10",time:"40 min",issue:"Froze on Grid sets"},
+  {date:"15 Mar 2026",name:"CL Mock 11",sets:"3/4",score:"36.80",time:"37 min",issue:"Mixed set accuracy 33%"},
+];
+
+function renderDILR(){
+  // Table
+  const tb = document.getElementById('dtbody');
+  if(!tb) return;
+  tb.innerHTML = SET_TYPES.map(s=>{
+    const sb = s.status==='critical'?`<span class="badge br">🚨 Critical</span>`:s.status==='improve'?`<span class="badge ba">⚡ Improve</span>`:`<span class="badge bg">✅ Strong</span>`;
+    const tc = s.trend.startsWith('+')?'#059669':s.trend==='0%'?'#6b7280':'#ef4444';
+    const bc = s.accuracy>=75?'#059669':s.accuracy>=50?'#f59e0b':'#ef4444';
+    return `<tr style="cursor:pointer;" title="Add to queue"><td><strong>${s.name}</strong></td><td>${s.attempts}</td><td><div class="mbar-w"><div class="mbar"><div class="mbar-f" style="width:${s.accuracy}%;background:${bc};"></div></div><span style="font-size:12px;font-weight:700;color:${bc};">${s.accuracy}%</span></div></td><td>${s.avgTime} min</td><td style="color:${tc};font-weight:600;">${s.trend}</td><td>${sb}</td></tr>`;
+  }).join('');
+
+  // Heatmap
+  const hm = document.getElementById('hmap');
+  if(hm){
+    const vals=[0,1,2,3,2,1,0,0,2,3,4,2,1,2,3,2,1,0,3,4,3,2,3,4,2,1,0,1,2,3,4,3,2,1,0,0];
+    hm.innerHTML = vals.map(v=>`<div class="hmc h${v}">${v||''}</div>`).join('');
+  }
+
+  // Radar
+  setTimeout(drawRadar, 100);
+
+  // History
+  const ht = document.getElementById('htbody');
+  if(ht) ht.innerHTML = HISTORY.map(m=>`<tr><td>${m.date}</td><td><strong>${m.name}</strong></td><td>${m.sets}</td><td style="font-weight:700;color:var(--green);">${m.score}</td><td>${m.time}</td><td style="color:var(--red);font-size:12px;">${m.issue}</td></tr>`).join('');
+}
+
+function rq(f){
+  const list = document.getElementById('sqlist');
+  const filtered = f==='all'?QUEUE:QUEUE.filter(s=>s.diff===f);
+  list.innerHTML = filtered.map(s=>`
+    <div class="sc">
+      <div class="sc-ico" style="background:${s.col};">${s.ico}</div>
+      <div class="sc-info"><div class="sc-ttl">${s.title}</div><div class="sc-meta">${s.type} · ${s.desc}</div></div>
+      <div class="sc-r"><div class="scd ${s.diff==='hard'?'dh':s.diff==='med'?'dm':'de'}">${s.diff==='hard'?'🔴 Hard':s.diff==='med'?'🟡 Medium':'🟢 Easy'}</div><div class="sc-time">⏱ ${s.time}</div></div>
+    </div>`).join('');
+}
+
+function drawRadar(){
+  const canvas = document.getElementById('rc');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx=130,cy=130,r=90,n=7;
+  const labels=['Arrangement','Games','Tables','Network','Grid','DI','Hybrid'];
+  const data=[87,74,70,28,62,81,45];
+  const as=(2*Math.PI)/n;
+  ctx.clearRect(0,0,260,260);
+  for(let i=1;i<=4;i++){
+    ctx.beginPath();
+    for(let j=0;j<n;j++){const a=j*as-Math.PI/2,pr=(r*i)/4;j===0?ctx.moveTo(cx+pr*Math.cos(a),cy+pr*Math.sin(a)):ctx.lineTo(cx+pr*Math.cos(a),cy+pr*Math.sin(a));}
+    ctx.closePath();ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;ctx.stroke();
+  }
+  for(let j=0;j<n;j++){const a=j*as-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.strokeStyle='#e5e7eb';ctx.stroke();}
+  ctx.beginPath();
+  data.forEach((d,j)=>{const a=j*as-Math.PI/2,dr=(r*d)/100;j===0?ctx.moveTo(cx+dr*Math.cos(a),cy+dr*Math.sin(a)):ctx.lineTo(cx+dr*Math.cos(a),cy+dr*Math.sin(a));});
+  ctx.closePath();ctx.fillStyle='rgba(5,150,105,.15)';ctx.fill();ctx.strokeStyle='#059669';ctx.lineWidth=2;ctx.stroke();
+  data.forEach((d,j)=>{const a=j*as-Math.PI/2,dr=(r*d)/100;ctx.beginPath();ctx.arc(cx+dr*Math.cos(a),cy+dr*Math.sin(a),4,0,2*Math.PI);ctx.fillStyle=d<50?'#ef4444':'#059669';ctx.fill();});
+  ctx.font='10px DM Sans,sans-serif';ctx.fillStyle='#6b7280';ctx.textAlign='center';
+  labels.forEach((l,j)=>{const a=j*as-Math.PI/2,lr=r+16;ctx.fillText(l,cx+lr*Math.cos(a),cy+lr*Math.sin(a));});
+}
+
+// ═══════════════════════ NAVIGATION ═══════════════════════
+function showSection(sec, el){
+  document.querySelectorAll('.screen[id^="sec-"]').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  el.classList.add('active');
+  if(sec==='dilr') renderDILR();
+}
+
+function switchTab(prefix, name, btn){
+  document.querySelectorAll(`[id^="${prefix}-"]`).forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`${prefix}-${name}`).classList.add('active');
+  btn.classList.add('active');
+  if(name==='queue') rq('all');
+  if(name==='history') renderDILR();
+}
+
+// ═══════════════════════ MODAL ═══════════════════════
+function openModal(){
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('md').value = new Date().toISOString().split('T')[0];
+  document.getElementById('srows').innerHTML='';
+  addSRow({type:'Arrangement & Sequencing',c:4,a:4,t:10});
+  addSRow({type:'Network Flow / Routes',c:1,a:4,t:18});
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function addSRow(d={}){
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px;';
+  div.innerHTML=`
+    <div class="inp-g"><label>Set Type</label><select>${SET_TYPES.map(s=>`<option${d.type===s.name?' selected':''}>${s.name}</option>`).join('')}</select></div>
+    <div class="inp-g"><label>Correct</label><input type="number" min="0" max="6" value="${d.c||2}"/></div>
+    <div class="inp-g"><label>Attempted</label><input type="number" min="0" max="6" value="${d.a||4}"/></div>
+    <div class="inp-g"><label>Time (min)</label><input type="number" min="0" max="40" value="${d.t||12}"/></div>`;
+  document.getElementById('srows').appendChild(div);
+}
+function submitMock(){
+  closeModal();
+  setTimeout(()=>alert('✦ Diagnostic Updated!\n\nAI has analysed your mock.\n🚨 Weakness confirmed: Network Flow (22% this attempt)\n✅ Arrangement still strong at 100%\n\nPractice queue updated with 3 new targeted sets.'),300);
+}
+
+function loadNewPassage(){ alert('In production: loads a new passage from the RC Verse library, re-runs author analysis, and resets the chat context.'); }
+
+// ═══════════════════════ INIT ═══════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderPassage();
+  renderTonality();
+  renderQuestions();
+  document.getElementById('modal').addEventListener('click', e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+});
+</script>
+</body>
+</html>
